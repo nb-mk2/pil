@@ -1,80 +1,176 @@
-<?xml version="1.0" encoding="UTF-8"?>
-<CONFIG>
-  <ProjectOptions>
-    <Version Value="11"/>
-    <PathDelim Value="\"/>
-    <General>
-      <SessionStorage Value="InProjectDir"/>
-      <MainUnit Value="0"/>
-      <Title Value="ejercicio1"/>
-      <ResourceType Value="res"/>
-      <UseXPManifest Value="True"/>
-      <Icon Value="0"/>
-    </General>
-    <i18n>
-      <EnableI18N LFM="False"/>
-    </i18n>
-    <BuildModes Count="1">
-      <Item1 Name="Default" Default="True"/>
-    </BuildModes>
-    <PublishOptions>
-      <Version Value="2"/>
-    </PublishOptions>
-    <RunParams>
-      <FormatVersion Value="2"/>
-      <Modes Count="1">
-        <Mode0 Name="default"/>
-      </Modes>
-    </RunParams>
-    <RequiredPackages Count="1">
-      <Item1>
-        <PackageName Value="LCL"/>
-      </Item1>
-    </RequiredPackages>
-    <Units Count="2">
-      <Unit0>
-        <Filename Value="ejercicio1.lpr"/>
-        <IsPartOfProject Value="True"/>
-      </Unit0>
-      <Unit1>
-        <Filename Value="unit1.pas"/>
-        <IsPartOfProject Value="True"/>
-        <ComponentName Value="Form1"/>
-        <HasResources Value="True"/>
-        <ResourceBaseClass Value="Form"/>
-        <UnitName Value="Unit1"/>
-      </Unit1>
-    </Units>
-  </ProjectOptions>
-  <CompilerOptions>
-    <Version Value="11"/>
-    <PathDelim Value="\"/>
-    <Target>
-      <Filename Value="ejercicio1"/>
-    </Target>
-    <SearchPaths>
-      <IncludeFiles Value="$(ProjOutDir)"/>
-      <UnitOutputDirectory Value="lib\$(TargetCPU)-$(TargetOS)"/>
-    </SearchPaths>
-    <Linking>
-      <Options>
-        <Win32>
-          <GraphicApplication Value="True"/>
-        </Win32>
-      </Options>
-    </Linking>
-  </CompilerOptions>
-  <Debugging>
-    <Exceptions Count="3">
-      <Item1>
-        <Name Value="EAbort"/>
-      </Item1>
-      <Item2>
-        <Name Value="ECodetoolError"/>
-      </Item2>
-      <Item3>
-        <Name Value="EFOpenError"/>
-      </Item3>
-    </Exceptions>
-  </Debugging>
-</CONFIG>
+unit Unit1;
+
+{$mode objfpc}{$H+}
+
+interface
+
+uses
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
+  ExtCtrls, Tipos, Pilasarreglos;
+
+type
+
+  { TForm1 }
+
+  TForm1 = class(TForm)
+    BuscarXprioridad: TButton;
+    CantProcesos: TButton;
+    ListBox1: TListBox;
+    Mostrar: TButton;
+    Salir: TButton;
+    ButtonApilar: TButton;
+    Nombre: TEdit;
+    Prioridad: TEdit;
+    Label1: TLabel;
+    Label2: TLabel;
+    Funcion: TRadioButton;
+    Procedimiento: TRadioButton;
+    Elija: TRadioGroup;
+    procedure BuscarXprioridadClick(Sender: TObject);
+    procedure ButtonApilarClick(Sender: TObject);
+    procedure CantProcesosClick(Sender: TObject);
+    procedure FormCreate(Sender: TObject);
+    procedure MostrarClick(Sender: TObject);
+    procedure SalirClick(Sender: TObject);
+
+  private
+    { private declarations }
+  public
+    { public declarations }
+  end;
+
+var
+  Form1: TForm1;
+  pilaNom:pila;
+
+implementation
+
+{$R *.lfm}
+
+{ TForm1 }
+procedure llenarPila(var pil:pila);
+var x,y:tipoelemento;
+  s:string;
+  cod:longint;
+  pilaux:pila;
+begin
+  if form1.procedimiento.Checked=true then
+   s:= 'Procedimiento'
+  else
+   s:= 'Funcion';
+  x.DS:=Form1.Nombre.Text +' '+ s;
+  Val(Form1.prioridad.Text,x.DN,cod);
+  if pil.Esvacia() then
+     pil.Apilar(x)
+  else
+      begin
+        pil.Recuperartope(y);
+        if (x.CompararTE(y, campo2)=mayor) then
+           begin
+              pilaux.Crearvacia;
+              while (x.CompararTE(y, campo2)=mayor) do
+                    begin
+                    pilaux.Apilar(y);
+                    pil.Desapilar();
+                    pil.Recuperartope(y);
+                    end;
+              pil.Apilar(x);
+              while not pilaux.Esvacia() do
+                    begin
+                    pilaux.Recuperartope(x);
+                    pil.Apilar(x);
+                    pilaux.Desapilar();
+                    end;
+           end
+        else
+           pil.Apilar(x);
+      end;
+end;
+
+procedure mostrarPila(pil:pila);
+var x:tipoelemento; s:string;
+begin
+   while not pil.Esvacia() do
+         begin
+           pil.Recuperartope(x);
+
+           S:= x.DS;
+           Form1.ListBox1.items.add('Nombre: '+S);
+           Str(x.DN, S);
+           Form1.ListBox1.items.add('Prioridad: '+S);
+           pil.Desapilar();
+         end;
+end;
+
+procedure contarProcesos(pil:pila);
+var x:tipoelemento;
+  conFun, conPro:integer;
+  s:string;
+begin
+  conFun:= 0;
+  conPro:= 0;
+  while not pil.Esvacia() do
+      begin
+        pil.Recuperartope(x);
+        if (Pos('Funcion', x.DS)<> 0) then
+           inc(conpro)
+        else
+            inc(confun);
+        pil.Desapilar();
+      end;
+  Str(conFun, S);
+  Form1.ListBox1.items.add('Cantidad de funciones: '+S);
+  Str(conPro, S);
+  Form1.ListBox1.items.add('Cantidad de procedimientos: '+S)
+end;
+
+procedure buscaPriori(pil:pila);
+var x:tipoelemento;
+  cont,n,cod:integer;
+  s:string;
+begin
+  cont:=0;
+  Val(Form1.prioridad.Text,N,cod);
+  while not pil.Esvacia() do
+      begin
+        pil.Recuperartope(x);
+        if x.DN = N then
+           inc(cont);
+        pil.Desapilar();
+      end;
+  Str(cont, S);
+  Form1.ListBox1.items.add('Cantidad total pendiente: '+S);
+end;
+
+procedure TForm1.ButtonApilarClick(Sender: TObject);
+begin
+   llenarPila(pilaNom);
+end;
+
+procedure TForm1.BuscarXprioridadClick(Sender: TObject);
+begin
+  buscaPriori(pilaNom);
+end;
+
+procedure TForm1.CantProcesosClick(Sender: TObject);
+begin
+  contarProcesos(pilaNom);
+end;
+
+procedure TForm1.FormCreate(Sender: TObject);
+begin
+  pilaNom.Crearvacia;
+end;
+
+procedure TForm1.MostrarClick(Sender: TObject);
+begin
+  mostrarPila(pilaNom)
+end;
+
+
+procedure TForm1.SalirClick(Sender: TObject);
+begin
+  form1.Close;
+end;
+
+end.
