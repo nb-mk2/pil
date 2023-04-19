@@ -72,7 +72,10 @@ begin
                     begin
                     pilaux.Apilar(y);
                     pil.Desapilar();
-                    pil.Recuperartope(y);
+                    if not pil.Esvacia() then
+                        pil.Recuperartope(y)
+                    else
+                        break; // salir del ciclo si la pila está vacía
                     end;
               pil.Apilar(x);
               while not pilaux.Esvacia() do
@@ -87,20 +90,7 @@ begin
       end;
 end;
 
-procedure mostrarPila(pil:pila);
-var x:tipoelemento; s:string;
-begin
-   while not pil.Esvacia() do
-         begin
-           pil.Recuperartope(x);
 
-           S:= x.DS;
-           Form1.ListBox1.items.add('Nombre: '+S);
-           Str(x.DN, S);
-           Form1.ListBox1.items.add('Prioridad: '+S);
-           pil.Desapilar();
-         end;
-end;
 
 procedure contarProcesos(pil:pila);
 var x:tipoelemento;
