@@ -5,34 +5,17 @@ unit Unit1;
 interface
 
 uses
-  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,
-  ExtCtrls, Tipos, Pilasarreglos;
+  Classes, SysUtils, FileUtil, Forms, Controls, Graphics, Dialogs, StdCtrls,Pilasarreglos,Tipos;
 
 type
 
   { TForm1 }
 
   TForm1 = class(TForm)
-    BuscarXprioridad: TButton;
-    CantProcesos: TButton;
-    ListBox1: TListBox;
-    Mostrar: TButton;
-    Salir: TButton;
-    ButtonApilar: TButton;
-    Nombre: TEdit;
-    Prioridad: TEdit;
-    Label1: TLabel;
-    Label2: TLabel;
-    Funcion: TRadioButton;
-    Procedimiento: TRadioButton;
-    Elija: TRadioGroup;
-    procedure BuscarXprioridadClick(Sender: TObject);
-    procedure ButtonApilarClick(Sender: TObject);
-    procedure CantProcesosClick(Sender: TObject);
+    Calcula_expresion: TButton;
+    expre: TEdit;
+    procedure Calcula_expresionClick(Sender: TObject);
     procedure FormCreate(Sender: TObject);
-    procedure MostrarClick(Sender: TObject);
-    procedure SalirClick(Sender: TObject);
-
   private
     { private declarations }
   public
@@ -41,126 +24,88 @@ type
 
 var
   Form1: TForm1;
-  pilaNom:pila;
+  Pileva:pila;
 
 implementation
 
 {$R *.lfm}
 
+
 { TForm1 }
-procedure llenarPila(var pil:pila);
-var x,y:tipoelemento;
-  s:string;
-  cod:longint;
-  pilaux:pila;
+function eval(s:string; pil:pila):boolean;
+var
+ i:integer;
+ op:char;
+ x,y:tipoelemento;
 begin
-  if form1.procedimiento.Checked=true then
-   s:= 'Procedimiento'
-  else
-   s:= 'Funcion';
-  x.DS:=Form1.Nombre.Text +' '+ s;
-  Val(Form1.prioridad.Text,x.DN,cod);
+  eval:=false;
+  for i:=1 to length(s) do
+    begin
+      op:= s[i];
+      x.DS:=s[i];
+      case op of
+        '(': pil.Apilar(x);
+        ')':
+             begin
+               if not pil.Esvacia() then
+                  begin
+                       pil.Recuperartope(y);
+                       if y.DS= '('then
+                          pil.Desapilar()
+                       else
+                           pil.Apilar(x);
+                  end
+               else
+                   pil.apilar(x);
+             end;
+        '[': pil.Apilar(x);
+        ']':
+             begin
+               if not pil.Esvacia() then
+                  begin
+                       pil.Recuperartope(y);
+                       if y.DS= '['then
+                          pil.Desapilar()
+                       else
+                           pil.Apilar(x);
+                  end
+               else
+                   pil.apilar(x);
+             end;
+        '{': pil.Apilar(x);
+        '}':
+             begin
+               if not pil.Esvacia() then
+                  begin
+                       pil.Recuperartope(y);
+                       if y.DS= '{'then
+                          pil.Desapilar()
+                       else
+                           pil.Apilar(x);
+                  end
+               else
+                   pil.apilar(x);
+             end;
+      end;
+    end;
   if pil.Esvacia() then
-     pil.Apilar(x)
+    eval:=true;
+ end;
+
+procedure TForm1.Calcula_expresionClick(Sender: TObject);
+var
+  s:string;
+begin
+  s:= form1.expre.Text;
+  if eval(s, Pileva) then
+  showmessage('expresion valida')
   else
-      begin
-        pil.Recuperartope(y);
-        if (x.CompararTE(y, campo2)=mayor) then
-           begin
-              pilaux.Crearvacia;
-              while (x.CompararTE(y, campo2)=mayor) do
-                    begin
-                    pilaux.Apilar(y);
-                    pil.Desapilar();
-                    if not pil.Esvacia() then
-                        pil.Recuperartope(y)
-                    else
-                        break; // salir del ciclo si la pila está vacía
-                    end;
-              pil.Apilar(x);
-              while not pilaux.Esvacia() do
-                    begin
-                    pilaux.Recuperartope(x);
-                    pil.Apilar(x);
-                    pilaux.Desapilar();
-                    end;
-           end
-        else
-           pil.Apilar(x);
-      end;
-end;
-
-
-
-procedure contarProcesos(pil:pila);
-var x:tipoelemento;
-  conFun, conPro:integer;
-  s:string;
-begin
-  conFun:= 0;
-  conPro:= 0;
-  while not pil.Esvacia() do
-      begin
-        pil.Recuperartope(x);
-        if (Pos('Funcion', x.DS)<> 0) then
-           inc(conpro)
-        else
-            inc(confun);
-        pil.Desapilar();
-      end;
-  Str(conFun, S);
-  Form1.ListBox1.items.add('Cantidad de funciones: '+S);
-  Str(conPro, S);
-  Form1.ListBox1.items.add('Cantidad de procedimientos: '+S)
-end;
-
-procedure buscaPriori(pil:pila);
-var x:tipoelemento;
-  cont,n,cod:integer;
-  s:string;
-begin
-  cont:=0;
-  Val(Form1.prioridad.Text,N,cod);
-  while not pil.Esvacia() do
-      begin
-        pil.Recuperartope(x);
-        if x.DN = N then
-           inc(cont);
-        pil.Desapilar();
-      end;
-  Str(cont, S);
-  Form1.ListBox1.items.add('Cantidad total pendiente: '+S);
-end;
-
-procedure TForm1.ButtonApilarClick(Sender: TObject);
-begin
-   llenarPila(pilaNom);
-end;
-
-procedure TForm1.BuscarXprioridadClick(Sender: TObject);
-begin
-  buscaPriori(pilaNom);
-end;
-
-procedure TForm1.CantProcesosClick(Sender: TObject);
-begin
-  contarProcesos(pilaNom);
+  showmessage('expresion no valida')
 end;
 
 procedure TForm1.FormCreate(Sender: TObject);
 begin
-  pilaNom.Crearvacia;
-end;
-
-procedure TForm1.MostrarClick(Sender: TObject);
-begin
-  mostrarPila(pilaNom)
-end;
-
-
-procedure TForm1.SalirClick(Sender: TObject);
-begin
-  form1.Close;
+  Pileva.Crearvacia;
 end;
 
 end.
