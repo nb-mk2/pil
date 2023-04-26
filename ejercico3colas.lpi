@@ -70,10 +70,9 @@ begin
     result := gcd(b, a mod b);
 end;
 
-procedure divisores(var col:cola);
+procedure divisores(var col: cola);
 var
   x, y: tipoelemento;
-  s: string;
   divisor: integer;
 begin
   while not col.Esvacia() do
@@ -84,7 +83,17 @@ begin
     divisor := x.DN; // Inicializar el divisor con el primer elemento de la cola
     y := x; // Asignar el primer elemento de la cola a 'y'
 
-    while not col.Esvacia() and (y.DS = x.DS) do
+    // Caso especial: cola con un solo elemento
+    if col.Esvacia() then
+    begin
+      if divisor = 1 then
+        form1.ListBox1.Items.Add('Banco: ' + x.DS + ' --- No tiene divisor')
+      else
+        form1.ListBox1.Items.Add('Banco: ' + x.DS + ' --- Divisor: ' + inttostr(divisor));
+      Break; // Salir del while
+    end;
+
+    while (not col.Esvacia()) and (y.DS = x.DS) do
     begin
       col.Recuperarfrente(y);
       col.Desencolar();
@@ -92,7 +101,7 @@ begin
       divisor := gcd(divisor, y.DN); // Calcular el MCD entre el divisor actual y el nuevo elemento
     end;
 
-    if divisor = x.DN then // Si el divisor sigue siendo igual al primer elemento de la cola
+    if divisor = 1 then // Si el divisor sigue siendo igual al primer elemento de la cola
     begin
       form1.ListBox1.Items.Add('Banco: ' + x.DS + ' --- No tiene divisor');
     end
@@ -100,7 +109,7 @@ begin
     begin
       form1.ListBox1.Items.Add('Banco: ' + x.DS + ' --- Divisor: ' + inttostr(divisor));
     end;
-      end;
+  end;
 end;
 
  { if col.Esvacia() then
